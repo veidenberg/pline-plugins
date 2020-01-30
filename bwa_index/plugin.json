@@ -1,0 +1,23 @@
+{
+  program: "bwa index",
+  name: "BWA index",
+  desc: "index database sequences in the FASTA format",
+  info: "Constructs the FM-index for the reference genome needed in mapping algorithms like BWA-MEM",
+  url: "http://bio-bwa.sourceforge.net",
+	jobName: "indexing",
+  category: "NGS",
+  options: [
+		{line: [
+			{file: "", name: "inFile", title: "Reference sequence", required: true, order: "end"},
+			{info: "Reference sequences in the FASTA format."}
+		]},
+		{select: "Algorithm", option: "a", desc: "Algorithm for constructing BWT index.", 
+			selection: [
+				{title: "IS", value: "is",	desc: "IS linear-time algorithm for constructing suffix array. It requires 5.37N memory where N is the size of the database. IS is moderately fast, but does not work with database larger than 2GB. IS is the default algorithm due to its simplicity. The current codes for IS algorithm are reimplemented by Yuta Mori.", default: true},
+				{title: "BWT-SW", value: "bwtsw", desc: "Algorithm implemented in BWT-SW. This method works with the whole human genome."}
+			]
+		}
+	]
+}
+
+      

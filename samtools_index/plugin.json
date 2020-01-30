@@ -1,0 +1,26 @@
+{
+  program: "samtools index",
+  name: "Samtools index",
+  desc: "Indexes SAM/BAM/CRAM files.",
+  info: "Indexes a coordinate-sorted BGZIP-compressed SAM, BAM or CRAM file for fast random access (Note that this does not work with uncompressed SAM files). This index is needed when region arguments are used to limit samtools view and similar commands to particular regions of interest.",
+  url: "http://www.htslib.org/doc/samtools.1.html",
+	jobName: "index",
+	outFiles: "inFile + extension",
+  category: "NGS",
+  options: [
+	  {file: "", name: "inFile", title: "Input BAM|SAM|CRAM", required: true, order: "last"},
+	  {group: "Output options", options: [
+		{line: [
+			{select: "Create", selection: [
+				{title: "BAI", default: true, desc: "Create a BAI index."},
+				{title: "CSI", option: "c", desc: "Create a CSI index."}
+			]},
+			{type: "hidden", name: "extension", value: [{c: ".csi"}, ".bai"]}, //helper value (not added to command)
+			{int: "m", title: "with a min. interval size", default: 14, 
+				desc: "Create a CSI index, with a minimum interval size of 2^INT. By default, the minimum interval size for the index is 2^14, which is the same as the fixed value used by the BAI format."}
+		]},
+		{text: "", order: "last", title: "Output filename", 
+			desc: "If an output filename is given, the index file will be written to this file. Otherwise, for a CRAM file aln.cram, index file aln.cram.crai will be created; for a BAM file aln.bam, either aln.bam.bai or aln.bam.csi will be created; and for a compressed SAM file aln.sam.gz, either aln.sam.gz.bai or aln.sam.gz.csi will be created, depending on the index format selected."}
+	]}
+]}
+

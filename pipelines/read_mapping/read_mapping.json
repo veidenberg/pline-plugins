@@ -1,0 +1,51 @@
+{
+ "name": "Read mapping",
+ "description": "Simple read mapping analysis. Example input files include a sample from a subset of E.coli NGS data.",
+ "pipeline": [
+  {
+   "plugin": "BWA_index",
+   "name": "index reference",
+   "inputs": {
+    "_files_": {
+     "inFile": "100kb_fragment.fa"
+    }
+   }
+  },
+  {
+   "plugin": "BWA_MEM",
+   "inputs": {
+    "name": "map reads",
+    "refFile_sel": "100kb_fragment.fa",
+    "_files_": {
+     "readsFile": "ERR3063446_1.fastq",
+     "matesFile": "ERR3063446_2.fastq"
+    },
+    "readsFile_sel": "_local_",
+    "matesFile_sel": "_local_",
+    "R": "@RG\\tID:ERR3063446\\tSM:ERR3063446"
+   }
+  },
+  {
+   "plugin": "Samtools_view",
+   "inputs": {
+    "inFile_sel": "_pipe_",
+    "b": true,
+    "outFormat": "BAM"
+   }
+  },
+  {
+   "plugin": "Samtools_sort",
+   "name": "sort",
+   "inputs": {
+    "inFile_sel": "output.bam"
+   }
+  },
+  {
+   "plugin": "Samtools_index",
+   "name": "index",
+   "inputs": {
+    "inFile_sel": "output_sorted.bam"
+   }
+  }
+ ]
+}

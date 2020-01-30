@@ -1,0 +1,226 @@
+{
+//executable
+  program: "codeml",
+  name: "CodeML",
+  version: "4.7",
+//used in interface
+  desc: "fits substitution models to sequence alignments",
+  url: "http://abacus.gene.ucl.ac.uk/software/paml.html",
+  submitBtn: ["Run analysis"],
+  enable: "sequence",
+  category: "PAML",
+  debug: false,
+//job run metadata
+  outFiles: "codeml_results.mlc",
+  jobName: "CodeML analysis",
+//parameter settings
+  configFile: "options.ctl",
+  prefix: "",
+  valueSep : " = ",
+//interface (parameter inputs)
+  options: [
+		{file: "seqfile", value: "alignment.phy", format: "phylip", 
+			required: "Open a codon or protein alignment for input source"}, //input alignment
+		{file: "treefile", source: "tree", value:"tree.nwk"}, //input tree
+		{hidden: "outfile", value: "output"}, //main output filename
+
+		{select: "Selection models:", name: "seltest", desc:"CodeML can estimate selection variability along sequence alignment sites and lineages by fitting selection models to the input alignment.", selection: [
+			{title: "Basic model", option:{ model:"0", NSsites:"0" }, 
+				desc: "Fits a basic site model (M0) with single ω value averaged over all alignment sites and tree lineages."},
+			//{title: "Variable site ratios", option:{model:0}, desc: "Allows the ω ratio to vary among sites (but constant over lineages)"},
+			{title: "Multiple site models", option: { model:"0", NSsites:"1 2 7 8" }, 
+				desc: "Fit 2 pairs of models (M1a,M2a,M7,M8) with variable site-wise ω ratio. Useful for likelihood ratio tests of positive selection."},
+			{title: "Branch model", option: { model:"2", NSsites:"0" }, 
+				desc: "Fits a ω ratio for each branch group (labelled with #number), averaged over all sites. Useful for detecting positive selection acting on particular lineages. Use the basic model (M0) as the null model."},
+			{title: "Branch-site model", option: { model:"2", NSsites:"2", fix_omega:"0" }, 
+				desc: "Aletrnative model A for branch-site test of positive selection. Allows ω to vary both among sequence sites and across tree branches. Aims to detect positive selection affecting a few sites along particular lineages (foreground branches)."},
+			{title: "Branch-site null model", option: { model:"2", NSsites:"2", fix_omega:"1", omega:"1" }, 
+				desc: "Null model for the branch-site test of positive selection (compared to branch-site model A)."},
+			{title: "Clade model", option:{ model:"3", NSsites:"2", ncatG:"3" }, 
+				desc: "Clade model C (branch-site model with 3 site classes). Use model M1a or M2a_rel as the null-model."},
+			{title: "Other models", value: "", desc: "Other combination of selection models to fit to the alignment/tree data."}
+		]},
+
+		{group: "Edit options", desc: "Fine-tune CodeML parameters.", options: [
+			{select: "Branch model", option: "model", required: "Select a branch model.", 
+			selection: [
+				{title: "single ω", value: "0", 
+					desc: "Fits a single ω averaged over all lineages in the phylogeny (when estimating ω for each site)."},
+				{title: "free ω", value: "1", 
+					desc: "Branch model 1. Estimates independent ω for each branch in the tree (not recommended)."},
+				{title: "multiple ω", value: "2", 
+					desc: "Branch model 2. Fits ω for each branch group (labelled as #number in the input tree)."},
+				{title: "clade model", value: "3", 
+					desc: "Clade model. Fits independent ω for each clade type (labelled with #number)."}
+			]},
+			
+			{group: "Site models", merge: " ", required: "Select a site model.", desc: "Site models fit ω ratios among alignment sites by assigning each site to a specific ω value class (Yang et al. 2000).", options: [
+				{line:"", options: [
+					{checkbox: "NSsites", value: "0", name: "M0", title: "M0: Single ratio", 
+						desc: "Estimates a single ω averaged over all alignment sites. 1 free parameter."},
+					{checkbox: "NSsites", value: "1", name: "M1", css:"margin-left:5px", title: "M1a: Nearly neutral", 
+						desc: "Asssumes 2 ω ratios accounting for negative and neutral selection (ω<0,ω=1). 2 free parameters."},
+					{checkbox: "NSsites", value: "2", name: "M2", css:"margin-left:5px", title: "M2a: Positive selection", 
+						desc: "Assumes 3 site categories (ω<1,ω=1,ω>1), allowing for positive selection sites. 4 free parameters. "}
+				]},
+				{line:"", options:[
+					{checkbox: "NSsites", value: "22", name: "M22", title: "M2a_rel", 
+						desc: "Assumes 3 site categories (ω<1,ω=1,ω>0). Use as null for testing the clade model. 4 free parameters."},
+					{checkbox: "NSsites", value: "7", name: "M7", css:"margin-left:5px", title: "M7: Beta", 
+						desc: "Assumes beta-distributed ω ratios across sites. 2 free parameters"},
+					{checkbox: "NSsites", value: "8", name: "M8", css:"margin-left:5px", title: "M8: Beta & omega", 
+						desc: "Assumes beta-distributed ω ratios, allowing for positive selection sites (ω>1). 4 free parameters"}
+				]},
+				{group: "Other site models", desc: "The models with complex mixed distributions (M9-M13) may not converge (finish calculations) and/or lack detection power.", options: [
+					{line:"", options:[
+						{checkbox: "NSsites", value: "3", name: "M3", title: "M3: Discrete", 
+							desc: "Uses an unconstrained discrete distribution with (by default) 3 site classes to model ω ratios among sites. 5 free parameters."},
+						{checkbox: "NSsites", value: "4", name: "M4", css:"margin-left:5px", title: "M4: Frequencies", 
+							desc: "Fixes ω ratios for 5 site classes (0, 1/3, 2/3, 1, 3) and estimates their frequencies"},
+						{checkbox: "NSsites", value: "5", name: "M5", css:"margin-left:5px", title: "M5: Gamma", 
+							desc: "Assumes a gamma distribution for ω rates along sites."}
+					]},
+					{line:"", options:[
+						{checkbox: "NSsites", value: "6", name: "M6", title: "M6: 2 gamma", 
+							desc: "Uses a mixture of two gamma distributions for ω rates"},			 
+						{checkbox: "NSsites", value: "9", name: "M9", css:"margin-left:5px", title: "M9: Beta & gamma"},
+						{checkbox: "NSsites", value: "10", name: "M10", css:"margin-left:5px", title: "M10: Beta & gamma+1", 
+							desc: "Uses a mixture of a beta and a gamma distr. (gamma shifted to ω>1)"}
+					]}, 
+					{line:"", options:[
+						{checkbox: "NSsites", value: "11", name: "M11", title: "M11: Beta & normal>1", 
+							desc: "Uses a mixture of beta and normal distr. (normal distr. truncated to ω>1)"},
+						{checkbox: "NSsites", value: "12", name: "M12", css:"margin-left:5px", title: "M12: 0 & 2 normal>0", 
+							desc: "ω=0 or drawn from 2 mixture of normal distributions truncated to ω>0"},
+						{checkbox: "NSsites", value: "13", name: "M13", css:"margin-left:5px", title: "M13: 3 normal>0", 
+							desc: "ω drawn from a mixtrue of 3 normal distributions truncated to ω>0"}
+					]}
+				]}
+			]},
+			
+			{group: "Adjust model parameters", options: [
+				{line:"", options:[
+					{checkbox: "fix_omega", title: "Fix ω", value: ["1","0"], default: "0", 
+						desc: "Set (either initial or fixed) omega value (nonsynonymous/synonymous rate). With branch model 2 (multiple ω), this fixes the last ω ratio."},
+					{number: "omega", title:"", default: 1},
+					{checkbox: "fix_kappa", title: "Fix κ", value: ["1","0"], default: "0", css:"margin-left:5px", 
+						desc: "Set (either initial or fixed) kappa value (transition/transversion rate)."},
+					{number: "kappa", title:"", default: 0.4},
+					{checkbox: "fix_rho", title: "Fix ρ", value: ["1","0"], default: "1", css:"margin-left:5px", 
+						desc: "Checked = independent rates for sites."},
+					{number: "rho", title:"", default: 0, desc: "Correlation of rates at adjacent sites."}
+				]},
+				{hidden: "fix_alpha", value:"1"},
+				{hidden: "alpha", value:"0"},
+				{number:"ncatG", title:"Site classes", default:[{"NSsites is 3": 3}, {"NSsites is 4": 5}, {"NSsites > 4": 10}], 
+					desc:"Adjusts the default number of categories (site classes) in the continuous ω distributions in site models. The default value (e.g. 10 categories in models M5-M13) is not adjustable when running multiple site models."}
+			]},
+			
+			{group: "Tree parameters", options:[
+				{select: "Molecular clock", option: "clock", desc: "Sets how the model allows substitution rates to vary among lineages.", selection: [
+					{title: "No clock", value: "0", default: true, desc: "Rates are free to vary from branch to branch. Input tree should to be unrooted."},
+					{title: "Global clock", value: "1", desc: "All branches have the same rate. Input tree should to be unrooted. Input tree should to be rooted."},
+					{title: "Local clock", value: "2", desc: "Estimate independent rates for selected branches (labelled with #number). Input tree should to be rooted."},
+					//{title: "Multigene clock", value: "3", desc: "Estimate independent rates for sequence data partitions (specified with option G in the input file)."}
+				]},
+				{select: "Estimate branch lengths", option: "method", enable: "clock is 0", selection: [
+					{title: "simultaneously", value: "0", desc: "Update all branch lengths simultaneously."},
+					{title: "one-by-one", value: "1", default: true, desc: "Update branch lengths one by one (newer algorithm)."}
+				]},
+				{select: "Input branch lengths", option: "fix_blength", enable: "treefile", desc:"Sets how the program uses the branch lengths from the input tree file", selection: [
+					{title: "random", value: "-1", desc: "Program starts from random starting points (useful in case of multiple local optima)."},
+					{title: "ignore", value: "0", desc: "Ignores input branch lengths."},
+					{title: "use in ML", value: "1", default: true, desc: "Uses the branch lengths as initial values for the ML iteration."},
+					{title: "use as fixed", value: "2", desc: "Branch lengths are fixed at the input tree file values."}
+				]}
+			]},
+		
+		{group: "Sequence parameters", options: [
+			{select: "Sequence type: ", option: "seqtype", default:[{"sequence is protein":2},1], selection:[
+			{title: "codons", value: "1"},
+			{title: "amino acids", value: "2"},
+			{title: "translated AA", value: "3", desc: "Analyzed as protein sequence translated from input DNA"}
+			]},
+			{line:"", options:[
+			{select: "Codon frequency: ", option: "CodonFreq", desc: "Equilibrium frequency of codons in the substitution model (𝛑).", selection: [
+				{title: "equal", value: "0", default: true, desc: "1/61 frequency assumed for each sense codon."},
+				{title: "F1x4", value: "1", desc: "Codon frequencies are calculated from the average nucleotide frequencies."},
+				{title: "F3x4", value: "2", desc: "Codon frequencies are calculated from the average nucleotide frequencies at the three codon positions."},
+				{title: "codon table", value: "3"},
+				//{title: "F1x4MG", value: "4"}, //multigene option
+				//{title: "F3x4MG", value: "5"},
+				{title: "FMutSel0", value: "6", desc: "Mutation-selection model (Yang & Nielsen, 2008) is used."},
+				{title: "FMutSel", value: "7", desc: "Mutation-selection model (Yang & Nielsen, 2008) is used."}
+			]},
+			{select: "Estimate frequencies: ", option: "estFreq", selection:[
+				{title: "observed", value: "0", desc: "Frequency/fitness parameters are calculated using the observed frequencies in the data."},
+				{title: "ML estimation", value: "1", desc: "Frequency/fitness parameters are estimated by Maximum Likelihood from the data."}
+			]}
+			]},
+			{select: "Amino acid distances: ", option: "aaDist", desc: "Sets which measure of pairwise amino acid distances (and relationship to ω) to use in the substitution model (Yang et al. 1998).", selection: [
+				{title: "equal", value: "0", default: true, desc: "Amino acid distances are assumed to be equal."},
+				{title: "geometric G1974", value: "1", desc: "Uses distance measures by Grantham (1974) with gemoetric relationship to ω"},
+				{title: "geometric Miyata", value: "2", desc: "Uses distance measures by Miyata et al. (1979) with gemoetric relationship to ω"},
+				{title: "geometric composition", value: "3", desc: "Property-based amino acid distances with geometric relationship to ω"},
+				{title: "geometric polarity", value: "4", desc: "Property-based amino acid distances with geometric relationship to ω"},
+				{title: "geometric volume", value: "5", desc: "Property-based amino acid distances with geometric relationship to ω"},
+				{title: "geometric aromaticity", value: "6", desc: "Property-based amino acid distances with geometric relationship to ω"},
+				{title: "AA classes", value: "7", desc:"Allows for several types of amino acid substitutions and estimates their rates (set in file OmegaAA.dat)."},
+				//{title: "fitness model 1", value: "11"}, //undocumented
+				//{title: "fitness model 2", value: "12"},
+				{title: "linear G1974", value: "-1", desc: "Uses distance measures by Grantham (1974) with gemoetric relationship to ω"},
+				{title: "linear Miyata", value: "-2", desc: "Uses distance measures by Miyata et al. (1979) with gemoetric relationship to ω"},
+				{title: "linear composition", value: "-3", desc: "Property-based amino acid distances with linear relationship to ω"},
+				{title: "linear polarity", value: "-4", desc: "Property-based amino acid distances with linear relationship to ω"},
+				{title: "linear volume", value: "-5", desc: "Property-based amino acid distances with linear relationship to ω"},
+				{title: "linear aromaticity", value: "-6", desc: "Property-based amino acid distances with linear relationship to ω"}
+			]}
+		]},
+		
+		{group: "Preferrably disabled options", desc: "Options recommended to be set 0 by the PAML manual.", options: [
+			{line:"", options:[
+			{checkbox: "getSE", title: "Standard errors", value: [1,0], default: 0, enable: "runmode is 0", desc: "Add (crude) standard error estimates for the estimated model parameters."},
+			{checkbox: "RateAncestor", title: "Ancestors and rates", value: [1,0], default: 0, css:"margin-left:5px", desc: "Performs empirical Bayesian reconstruction of ancestral sequences. For models with variable rates across sequence sites, also calculates individual rates for each site."},
+			{checkbox: "clean_data", title: "Clean data", default: false, css:"margin-left:5px", desc: "Remove all alignment sites which contain gaps or ambiguity characters."}
+			]},
+			{line:"", options:[
+			{select: "Tree estimation", option: "runmode", selection: [
+				{title: "Bayesian estimation", value: "-3", desc: "Performs Bayesian estimation of pairwise sequence distances (t and ω)."},
+				{title: "ML estimation", value: "-2", desc: "Performs Maximum Likelihood estimation of dS/dN (for all sequences) in pairwise comparisons."},
+				{title: "Input tree", value: "0", default: true, desc: "Input tree file is used (no tree search)."},
+				{title: "Star-decomposition", value: "1", desc: "Heuristic tree search by the star-decomposition algorithm."},
+				{title: "Input tree + star-decomposition", value: "2", desc: "Heuristic tree search by the star-decomposition algorithm (fitting the input tree)."},
+				{title: "Stepwise addition", value: "3", desc: "Stepwise addition (for small datasets)."},
+				{title: "NNI perturbation", value: "4", desc: "NNI perturbation (starting tree from parsimony algorithm)."},
+				{title: "Input tree + NNI perturbation", value: "5", desc: "NNI perturbation (starting tree from user input)."}	
+			]},
+			{select: "Genetic code", option: "icode", desc: "Sets genetic code (using translation tables from GenBank)", selection: [
+				{title: "standard", value: "0", default: true, desc: "The standard (universal) genetic code."},
+				{title: "mammalian mt", value: "1", desc: "Vertebrate mitochondrial code."},
+				{title: "yeast mt", value: "2", desc: "Yeast mitochondrial code."},
+				{title: "mold mt", value: "3", desc: "Mold, Protozoan, and Coelenterate mitochondrial code."},
+				{title: "invertebrate mt", value: "4", desc: "Invertebrate mitochondrial code."},
+				{title: "ciliate nuclear", value: "5", desc: "Ciliate, Dasycladacean and Hexamita nuclear code."},
+				{title: "echinoderm mt", value: "6", desc: "Echinoderm and Flatworm mitochondrial code."},
+				{title: "euploid nuclear", value: "7", desc: "Euplotid nuclear code."},
+				{title: "alternative yeast", value: "8", desc: "Alternative Yeast nuclear code."},
+				{title: "ascidian mt", value: "9", desc: "Ascidian mitochondrial code."},
+				{title: "blepharisma nuclear", value: "10", desc: "Blepharisma nuclear code."},
+				{title: "regularized code", value: "11", desc: "Yang’s regularized code (all codons are 4-fold degenerate)."},
+			]}
+			]}
+			]},
+		
+		{group: "Other options", options: [
+			{line:"Amount of output ", options:[
+			{select: "to console", option: "noisy", desc: "Amount of information printed to the console screen.", default: 1, selection:[0,1,2,3]},
+			{select: "to files", option: "verbose", desc: "Print concise or detailed information to the output files.", default: 0, selection:[0,1]}
+			]},
+			
+			{number:"Small_Diff", title: "Difference value", default:1e-6, css:"width:80px", desc:"Small value used in the difference approximation of derivatives. Use a value between 1e-8 and 1e-5 and check that the results are not sensitive to the value used."},
+			{hidden: "Mgene", value:"0"}, //for multigene datasets (file option "G")
+			{hidden: "ndata", value:"1"} //for multiple datasets (from "evolver")
+			]}
+		]}
+	]
+}

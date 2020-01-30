@@ -1,0 +1,22 @@
+//Wasabi plugin file for a perl script. Written by Andres Veidenberg (2019).
+{
+  program: "modeltester.pl",
+  name: "CodeML tester",
+  desc: "Compares common model pairs from a CodeML results file",
+  outFiles: "outfilename",
+  jobName: "CodeML results",
+  submit: ["Run tests"],
+  prefix: "-",
+  category: "PAML",
+  options: [
+	{group: "Options", desc: "Hover option labels for description", options: [
+		{file: "", desc: "CodeML .mlc file with results from site models.", required: "Give .mlc file for site models."},
+		/*{file: "", desc: "CodeML .mlc file with results from branch model analysis."},*/
+		{text: "", name: "outfilename", title: "Output filename:", default: "model_tests.csv", css: "width:120px"},
+		{line: "Show positively selected ", desc: "Include positively selected sites (BEB analysis) and/or branches in the output .csv table", options: [
+			{checkbox: "sites", default: true},
+			{checkbox: "branches", default: true}
+		]}
+	]}
+  ]
+}

@@ -1,0 +1,73 @@
+//Wasabi plugin for PRANK aligner. Written by Andres Veidenberg (2019).
+{
+  program: "prank",
+  name: "PRANK",
+  version: "140603",
+  icon: ["prank", "icon_prank.png"],
+  desc: "Probabilistic multiple sequence alignment program.",
+  url: "http://wasabiapp.org/software/prank",
+  outFiles: ["out.best.xml", "out.xml"], //output filename candidates
+  jobName: "Prank realignment",
+  translateTaxa: false,
+  submitBtn: "Start alignment",
+  prefix: "-",
+  valueSep: "=",
+  enable: "sequence",
+	category: "Aligners",
+  options: [
+		{file:"d", source:"sequence", format:"fasta", required:"Input sequence data needed"},
+		{line: [
+			{checkbox:"newtree", title:"Compute guidetree", default:"no tree", fixed: "no tree",
+			desc:"Create a new NJ tree to guide the sequence alignment process (uncheck to use the imported tree)"},
+			{enable: "no newtree", "line": [
+				" or ",
+				{file:"t", source:"tree", format:"newick"}
+			]}
+		]},
+		{group: "Alignment options", options: [
+			{checkbox:"noanchors", title:"alignment anchoring", desc:"Use Exonerate anchoring to speed up alignment", default:false, value:[false,true]}, //inverted value
+			{checkbox:"keep", title:"keep current alignment", desc:"Keep current alignment intact and just add sequences for ancestral nodes"},
+			{line:"", disable:"keep", options:[ 
+				{select:"Iterate alignment for", option:"iterate", selection:[{title:1,desc:"No iteration"},2,3,4,{title:5,default:true}], 
+					desc:"Iterating re-alignment cycles can improve tree phylogeny. No iteration (1) keeps the input tree intact."}, "cycles"
+			]},
+			{group: "Fine-tuning", desc: "Click to toggle additional parameters", options: [
+				{checkbox:"F", title:"trust insertions (+F)", desc:"Force insertions to be always skipped. Enabling this option is generally beneficial but may cause an excess of gaps if the guide tree is incorrect", default:true},
+				{checkbox:"nomissing", title:"no missing data", desc:"Do not treat gaps as missing data. Use +F for terminal gaps", value:[false,true]},
+				{hidden:"termgap", default:"nomissing"},
+			{section:"alignment model parameters", options:[{enable:"sequence type is DNA", options:[
+				{select:"Align as", desc:"Translate and align cDNA with protein or codon model", selection:[
+					{title:"DNA", default:true},
+					{title:"codons", option:"codon"},
+					{title:"protein", option:"translate"}
+				]},
+				{line:"DNA base frequencies", valuesep:",", desc:"Default values are empirical, based on the input data", options:[ //merged option value
+					{number:"dnafreqs", title:"", default:"A"}, {number:"dnafreqs", title:"", default:"C"}, 
+					{number:"dnafreqs", title:"", default:"G"}, {number:"dnafreqs", title:"", default:"T"}
+				]},
+				{line:"", options:[
+					{number:"kappa", title:"K", desc:"Transition/transversion rate ratio in substitution model", default:2},
+					{number:"rho", title:"P", desc:"Purine/pyrimidine rate ratio in substitution model", default:1}
+				]},
+					]}, //when DNA
+					{line:"", options:[
+					{number:"gaprate", title:"Gap opening", desc:"Gap opening rate", css:"width:45px", default:[{"sequence type is DNA":0.025}, 0.005]},
+					{number:"gapext", title:"gap extension", desc:"Gap extension probability", css:"width:40px", default:[{"sequence type is DNA":0.75}, 0.5]}
+				]}
+			]},
+			{section:"optimization scoring", desc: "The optimization score is used to assess an alignment iteration result", enable:"iterate > 1", options:[
+				{line:"Indels with length", valuesep: ",", desc:"Indel penalties for alginment scoring (with substitution penalty as 1)", options:[
+					{number:"indelscore", title:"1:", default:6}, //merged option value
+					{number:"indelscore", title:"2:", default:8},
+					{number:"indelscore", title:"3:", default:9},
+					{number:"indelscore", title:"4+:", default:10}
+				]}
+			]}, //when iterate
+			{section:"", options:[
+				{number:"seed", title:"random number seed", desc: "Specifing a seed number allows reproducing alignment results"},
+				{checkbox:"uselogs", title:"use log space", desc:"Slow, but may be needed for very large number of sequences"}
+			]}
+		]} //group2
+	]}, //group1
+	{hidden:"o", value:"out"}, {hidden:"dots"}, {hidden:"showanc"}, {hidden:"showxml"}, {hidden:"showevents"}
+]} //options

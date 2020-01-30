@@ -1,0 +1,40 @@
+{
+  program: "samtools sort",
+  name: "Samtools sort",
+  desc: "Sorts SAM/BAM/CRAM files.",
+  info: "Sorts alignments by leftmost coordinates, or by read name when -n is used. An appropriate @HD-SO sort order header tag will be added or an existing one updated if necessary.",
+  url: "http://www.htslib.org/doc/samtools.1.html",
+	jobName: "sort",
+	stdout: "(inFile.rootname or output) + _sorted. + (O or bam)", //computed filename (defaults to "output_sorted.bam")
+	category: "NGS",
+  options: [
+	  {file: "", name: "inFile", title: "Input BAM|SAM|CRAM", required: true, order: "last"},
+	  {group:"Output options", options:[
+		{line:[
+			{text:"o", title:"Write output to", default:"stdout", outfile:true, desc:"Filename for the sorted output file (default: standard output)."},
+			{select:"in", option:"O", selection:[
+				{title:"auto", value:"", default:true, desc:"By default, samtools tries to select a format based on the output filename extension; if output is to standard output or no format can be deduced, BAM is selected."},
+				{title:"SAM", value:"sam", desc:"Write the final output as SAM."},
+				{title:"BAM", value:"bam", desc:"Write the final output as BAM."},
+				{title:"CRAM", value:"cram", desc:"Write the final output as CRAM."}
+			]},
+			"format, ",
+			{select:"compressed at", desc:"Set the desired compression level for the final output file, ranging from 0 (uncompressed) or 1 (fastest but minimal compression) to 9 (best compression but slowest to write), similarly to the gzip compression level setting.", selection:[
+				{title:"default", value:"", default:true}, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+			]},
+			"level"
+		]},
+		{text:"T", title:"Temp. file prefix", desc:"Write temporary files to PREFIX.nnnn.bam, or if the specified PREFIX is an existing directory, to PREFIX/samtools.mmm.mmm.tmp.nnnn.bam, where mmm is unique to this invocation of the sort command. By default, any temporary files are written alongside the output file, as out.bam.tmp.nnnn.bam, or if output is to standard output, in the current directory as samtools.mmm.mmm.tmp.nnnn.bam."},
+		{bool:"--no-PG", title:"exclude @PG from header", desc: "Do not add a @PG line to the header of the output file."},
+		{line:[
+			{text:"t", title:"Sort by tag", desc:"Sort first by the value in the alignment tag TAG."},
+			{line:", then by", enable: "t"},
+			{line:", or by", enable: "no t"},
+			{select:"", selection:[
+				{title:"position", default:true},
+				{title:"name", option:"n", desc:"Sort by read names (i.e., the QNAME field) rather than by chromosomal coordinates."}
+			]}
+		]}
+	]}
+]}
+

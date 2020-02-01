@@ -70,4 +70,4 @@
 		]} //group2
 	]}, //group1
 	{hidden:"o", value:"out"}, {hidden:"dots"}, {hidden:"showanc"}, {hidden:"showxml"}, {hidden:"showevents"}
-]} //options
+]}

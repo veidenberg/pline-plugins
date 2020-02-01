@@ -13,8 +13,8 @@
   },
   {
    "plugin": "BWA_MEM",
+   "name": "map reads",
    "inputs": {
-    "name": "map reads",
     "refFile_sel": "100kb_fragment.fa",
     "_files_": {
      "readsFile": "ERR3063446_1.fastq",
@@ -27,6 +27,7 @@
   },
   {
    "plugin": "Samtools_view",
+   "name": "convert to BAM",
    "inputs": {
     "inFile_sel": "_pipe_",
     "b": true,
@@ -35,14 +36,14 @@
   },
   {
    "plugin": "Samtools_sort",
-   "name": "sort",
+   "name": "sort alignments",
    "inputs": {
     "inFile_sel": "output.bam"
    }
   },
   {
    "plugin": "Samtools_index",
-   "name": "index",
+   "name": "index BAM",
    "inputs": {
     "inFile_sel": "output_sorted.bam"
    }

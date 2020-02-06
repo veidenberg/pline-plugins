@@ -1,6 +1,6 @@
 {
  "name": "Read mapping",
- "description": "Simple read mapping analysis. Example input files include a sample from a subset of E.coli NGS data.",
+ "desc": "Simple read mapping analysis. Example input files include a sample from a subset of E.coli NGS data.",
  "pipeline": [
   {
    "plugin": "BWA_index",
